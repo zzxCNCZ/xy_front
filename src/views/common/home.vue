@@ -1,0 +1,150 @@
+<template>
+    <div class="mod-demo-echarts">
+      <el-row :gutter="20">
+        <el-col :span="24">
+          <el-card>
+            <div id="J_chartBarBox" class="chart-box"></div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
+</template>
+
+<script>
+import echarts from 'echarts'
+export default {
+  data () {
+    return {
+      chartBar: null
+    }
+  },
+  mounted () {
+    this.initChartBar()
+  },
+  activated () {
+    // 由于给echart添加了resize事件, 在组件激活时需要重新resize绘画一次, 否则出现空白bug
+    if (this.chartBar) {
+      this.chartBar.resize()
+    }
+  },
+  methods: {
+    // 柱状图
+    initChartBar () {
+      var option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'shadow'
+          }
+        },
+        legend: {
+          data: ['数据1', '数据2', '数据3', '数据4', '数据5', '数据6', '数据7', '数据8', '数据9']
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: [
+          {
+            type: 'category',
+            data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value'
+          }
+        ],
+        series: [
+          {
+            name: '数据1',
+            type: 'bar',
+            data: [320, 332, 301, 334, 390, 330, 320]
+          },
+          {
+            name: '数据2',
+            type: 'bar',
+            stack: '广告',
+            data: [120, 132, 101, 134, 90, 230, 210]
+          },
+          {
+            name: '数据3',
+            type: 'bar',
+            stack: '广告',
+            data: [220, 182, 191, 234, 290, 330, 310]
+          },
+          {
+            name: '数据4',
+            type: 'bar',
+            stack: '广告',
+            data: [150, 232, 201, 154, 190, 330, 410]
+          },
+          {
+            name: '数据5',
+            type: 'bar',
+            data: [862, 1018, 964, 1026, 1679, 1600, 1570],
+            markLine: {
+              lineStyle: {
+                normal: {
+                  type: 'dashed'
+                }
+              },
+              data: [
+                [{ type: 'min' }, { type: 'max' }]
+              ]
+            }
+          },
+          {
+            name: '数据6',
+            type: 'bar',
+            barWidth: 5,
+            stack: '搜索引擎',
+            data: [620, 732, 701, 734, 1090, 1130, 1120]
+          },
+          {
+            name: '数据7',
+            type: 'bar',
+            stack: '搜索引擎',
+            data: [120, 132, 101, 134, 290, 230, 220]
+          },
+          {
+            name: '数据8',
+            type: 'bar',
+            stack: '搜索引擎',
+            data: [60, 72, 71, 74, 190, 130, 110]
+          },
+          {
+            name: '数据9',
+            type: 'bar',
+            stack: '搜索引擎',
+            data: [62, 82, 91, 84, 109, 110, 120]
+          }
+        ]
+      }
+      this.chartBar = echarts.init(document.getElementById('J_chartBarBox'))
+      this.chartBar.setOption(option)
+      window.addEventListener('resize', () => {
+        this.chartBar.resize()
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+  .mod-demo-echarts {
+  > .el-row {
+    margin-top: -10px;
+    margin-bottom: -10px;
+  .el-col {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+  }
+  .chart-box {
+    min-height: 400px;
+  }
+  }
+</style>
