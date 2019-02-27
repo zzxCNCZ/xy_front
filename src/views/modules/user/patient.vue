@@ -40,7 +40,7 @@
         prop="sex"
         header-align="center"
         align="center"
-        label="性别(默认为0，0：男，1：女)">
+        label="性别">
       </el-table-column>
       <el-table-column
         prop="age"
@@ -79,24 +79,28 @@
         label="紧急联系人电话">
       </el-table-column>
       <el-table-column
+        v-if="columnVisible"
         prop="delFlag"
         header-align="center"
         align="center"
         label="删除标志">
       </el-table-column>
       <el-table-column
+        v-if="columnVisible"
         prop="createBy"
         header-align="center"
         align="center"
         label="创建人">
       </el-table-column>
       <el-table-column
+        v-if="columnVisible"
         prop="createTime"
         header-align="center"
         align="center"
         label="创建时间">
       </el-table-column>
       <el-table-column
+        v-if="columnVisible"
         prop="modifyBy"
         header-align="center"
         align="center"
@@ -108,6 +112,17 @@
         header-align="center"
         align="center"
         label="修改时间">
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
+        label="手续">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="addRecordHandle(scope.row.id)">入院</el-button>
+          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">住院记录</el-button>
+        </template>
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -132,11 +147,14 @@
     </el-pagination>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
+    <!-- 新增入院记录-->
+    <add-patient-record v-if="addPatientRecordVisible" ref="addPatientRecord" @refreshDataList="getDataList"></add-patient-record>
   </div>
 </template>
 
 <script>
 import AddOrUpdate from './patient-add-or-update'
+import AddPatientRecord from './patientrecord-add-or-update'
 export default {
   data () {
     return {
@@ -150,11 +168,13 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      addPatientRecordVisible: false
     }
   },
   components: {
-    AddOrUpdate
+    AddOrUpdate,
+    AddPatientRecord
   },
   activated () {
     this.getDataList()
@@ -196,6 +216,12 @@ export default {
     // 多选
     selectionChangeHandle (val) {
       this.dataListSelections = val
+    },
+    addRecordHandle (id) {
+      this.addPatientRecordVisible = true
+      this.$nextTick(() => {
+        this.$refs.addPatientRecord.initRecord(id)
+      })
     },
     // 新增 / 修改
     addOrUpdateHandle (id) {

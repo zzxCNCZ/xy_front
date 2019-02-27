@@ -38,7 +38,7 @@
       <el-input v-model="dataForm.endTime" placeholder="出院日期"></el-input>
     </el-form-item>
     <el-form-item label="删除标志" prop="delFalg">
-      <el-input v-model="dataForm.delFalg" placeholder="删除标志"></el-input>
+      <el-input v-model="dataForm.delFlag" placeholder="删除标志"></el-input>
     </el-form-item>
     <el-form-item label="创建人" prop="createBy">
       <el-input v-model="dataForm.createBy" placeholder="创建人"></el-input>
@@ -78,7 +78,7 @@ export default {
         status: '',
         startTime: '',
         endTime: '',
-        delFalg: '',
+        delFlag: '',
         createBy: '',
         createTime: '',
         modifyBy: '',
@@ -117,26 +117,15 @@ export default {
         ],
         endTime: [
           { required: true, message: '出院日期不能为空', trigger: 'blur' }
-        ],
-        delFalg: [
-          { required: true, message: '删除标志不能为空', trigger: 'blur' }
-        ],
-        createBy: [
-          { required: true, message: '创建人不能为空', trigger: 'blur' }
-        ],
-        createTime: [
-          { required: true, message: '创建时间不能为空', trigger: 'blur' }
-        ],
-        modifyBy: [
-          { required: true, message: '修改任不能为空', trigger: 'blur' }
-        ],
-        modifyTime: [
-          { required: true, message: '修改时间不能为空', trigger: 'blur' }
         ]
       }
     }
   },
   methods: {
+    initRecord (patientId) {
+      this.dataForm.patientId = patientId
+      this.visible = true
+    },
     init (id) {
       this.dataForm.id = id || 0
       this.visible = true
@@ -160,7 +149,7 @@ export default {
               this.dataForm.status = data.patientRecord.status
               this.dataForm.startTime = data.patientRecord.startTime
               this.dataForm.endTime = data.patientRecord.endTime
-              this.dataForm.delFalg = data.patientRecord.delFalg
+              this.dataForm.delFlag = data.patientRecord.delFlag
               this.dataForm.createBy = data.patientRecord.createBy
               this.dataForm.createTime = data.patientRecord.createTime
               this.dataForm.modifyBy = data.patientRecord.modifyBy
@@ -190,7 +179,7 @@ export default {
               'status': this.dataForm.status,
               'startTime': this.dataForm.startTime,
               'endTime': this.dataForm.endTime,
-              'delFalg': this.dataForm.delFalg,
+              'delFlag': this.dataForm.delFlag,
               'createBy': this.dataForm.createBy,
               'createTime': this.dataForm.createTime,
               'modifyBy': this.dataForm.modifyBy,

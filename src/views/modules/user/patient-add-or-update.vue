@@ -121,11 +121,8 @@ export default {
               this.dataForm.mobile = data.patient.mobile
               this.dataForm.emergencyConnectName = data.patient.emergencyConnectName
               this.dataForm.emergencyConnectMobile = data.patient.emergencyConnectMobile
-              this.dataForm.delFlag = data.patient.delFlag
               this.dataForm.createBy = data.patient.createBy
               this.dataForm.createTime = data.patient.createTime
-              this.dataForm.modifyBy = data.patient.modifyBy
-              this.dataForm.modifyTime = data.patient.modifyTime
             }
           })
         }

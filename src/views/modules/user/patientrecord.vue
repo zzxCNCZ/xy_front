@@ -95,7 +95,7 @@
         label="出院日期">
       </el-table-column>
       <el-table-column
-        prop="delFalg"
+        prop="delFlag"
         header-align="center"
         align="center"
         label="删除标志">
