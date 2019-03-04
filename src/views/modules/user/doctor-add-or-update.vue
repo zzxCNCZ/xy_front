@@ -7,35 +7,52 @@
     <el-form-item label="姓名" prop="name">
       <el-input v-model="dataForm.name" placeholder="姓名"></el-input>
     </el-form-item>
-    <el-form-item label="性别 0 男 1 女" prop="sex">
-      <el-input v-model="dataForm.sex" placeholder="性别 0 男 1 女"></el-input>
-    </el-form-item>
+      <el-form-item label="性别" prop="sex">
+        <el-select v-model="dataForm.sex"  filterable clearable  placeholder="性别">
+          <el-option
+            v-for="item in sexOption"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
     <el-form-item label="年龄" prop="age">
       <el-input v-model="dataForm.age" placeholder="年龄"></el-input>
     </el-form-item>
     <el-form-item label="手机号码" prop="mobile">
       <el-input v-model="dataForm.mobile" placeholder="手机号码"></el-input>
     </el-form-item>
-    <el-form-item label="单位编号" prop="deptId">
-      <el-input v-model="dataForm.deptId" placeholder="单位编号"></el-input>
-    </el-form-item>
+    <!--<el-form-item label="单位编号" prop="deptId">-->
+      <!--<el-input v-model="dataForm.deptId" placeholder="单位编号"></el-input>-->
+    <!--</el-form-item>-->
+      <el-form-item label="部门" prop="deptId">
+        <el-popover
+          ref="deptListPopover"
+          placement="bottom-start"
+          trigger="click">
+          <el-tree
+            :data="deptList"
+            :props="deptListTreeProps"
+            node-key="id"
+            ref="deptListTree"
+            @current-change="deptListTreeCurrentChangeHandle"
+            :default-expand-all="true"
+            :highlight-current="true"
+            :expand-on-click-node="false">
+          </el-tree>
+        </el-popover>
+        <el-input v-model="dataForm.deptName" v-popover:deptListPopover :readonly="true" placeholder="点击选择部门" class="menu-list__input"></el-input>
+      </el-form-item>
     <el-form-item label="职位" prop="job">
-      <el-input v-model="dataForm.job" placeholder="职位"></el-input>
-    </el-form-item>
-    <el-form-item label="删除标志" prop="delFlag">
-      <el-input v-model="dataForm.delFlag" placeholder="删除标志"></el-input>
-    </el-form-item>
-    <el-form-item label="创建人" prop="createBy">
-      <el-input v-model="dataForm.createBy" placeholder="创建人"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
-    <el-form-item label="修改人" prop="modifyBy">
-      <el-input v-model="dataForm.modifyBy" placeholder="修改人"></el-input>
-    </el-form-item>
-    <el-form-item label="修改时间" prop="modifyTime">
-      <el-input v-model="dataForm.modifyTime" placeholder="修改时间"></el-input>
+      <el-select v-model="dataForm.job"  filterable clearable  placeholder="职位">
+        <el-option
+          v-for="item in jobOption"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
     </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -46,23 +63,40 @@
 </template>
 
 <script>
+import { treeDataTranslate } from '@/utils'
 export default {
   data () {
     return {
+      sexOption: [{
+        value: 0,
+        label: '男'
+      }, {
+        value: 1,
+        label: '女'
+      }],
+      jobOption: [{
+        value: 'main',
+        label: '主治医师'
+      }, {
+        value: 'bed',
+        label: '管床医师'
+      }, {
+        value: 'nurse',
+        label: '护士'
+      }, {
+        value: 'chief',
+        label: '主任医师'
+      }],
       visible: false,
       dataForm: {
         id: 0,
         name: '',
-        sex: '',
+        sex: 0,
         age: '',
         mobile: '',
         deptId: '',
         job: '',
-        delFlag: '',
-        createBy: '',
-        createTime: '',
-        modifyBy: '',
-        modifyTime: ''
+        deptName: ''
       },
       dataRule: {
         name: [
@@ -82,31 +116,41 @@ export default {
         ],
         job: [
           { required: true, message: '职位不能为空', trigger: 'blur' }
-        ],
-        delFlag: [
-          { required: true, message: '删除标志不能为空', trigger: 'blur' }
-        ],
-        createBy: [
-          { required: true, message: '创建人不能为空', trigger: 'blur' }
-        ],
-        createTime: [
-          { required: true, message: '创建时间不能为空', trigger: 'blur' }
-        ],
-        modifyBy: [
-          { required: true, message: '修改人不能为空', trigger: 'blur' }
-        ],
-        modifyTime: [
-          { required: true, message: '修改时间不能为空', trigger: 'blur' }
         ]
+      },
+      deptList: [],
+      deptListTreeProps: {
+        label: 'name',
+        children: 'children'
       }
     }
   },
-  methods: {
+  methods: { // 单位数选中
+    deptListTreeCurrentChangeHandle (data, node) {
+      this.dataForm.deptId = data.id
+      this.dataForm.deptName = data.name
+    },
+    // 单位树设置当前选中节点
+    deptListTreeSetCurrentNode () {
+      this.$refs.deptListTree.setCurrentKey(this.dataForm.deptId)
+      this.dataForm.deptName = (this.$refs.deptListTree.getCurrentNode() || {})['name']
+    },
     init (id) {
       this.dataForm.id = id || 0
       this.visible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].resetFields()
+      this.$http({
+        url: this.$http.adornUrl('/user/dept/all'),
+        method: 'get',
+        params: this.$http.adornParams({
+          'deptId': this.dataForm.deptId
+        })
+      }).then(({data}) => {
+        this.deptList = treeDataTranslate(data.deptList, 'id')
+      }).then(() => {
+        this.$nextTick(() => {
+          this.$refs['dataForm'].resetFields()
+        })
+      }).then(() => {
         if (this.dataForm.id) {
           this.$http({
             url: this.$http.adornUrl(`/user/doctor/info/${this.dataForm.id}`),
@@ -120,13 +164,11 @@ export default {
               this.dataForm.mobile = data.doctor.mobile
               this.dataForm.deptId = data.doctor.deptId
               this.dataForm.job = data.doctor.job
-              this.dataForm.delFlag = data.doctor.delFlag
-              this.dataForm.createBy = data.doctor.createBy
-              this.dataForm.createTime = data.doctor.createTime
-              this.dataForm.modifyBy = data.doctor.modifyBy
-              this.dataForm.modifyTime = data.doctor.modifyTime
+              this.deptListTreeSetCurrentNode()
             }
           })
+        } else {
+          this.deptListTreeSetCurrentNode()
         }
       })
     },

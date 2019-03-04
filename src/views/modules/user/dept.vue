@@ -7,7 +7,6 @@
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button v-if="isAuth('user:dept:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('user:dept:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -15,66 +14,19 @@
       border
       v-loading="dataListLoading"
       @selection-change="selectionChangeHandle"
-      style="width: 100%;">
-      <el-table-column
-        type="selection"
-        header-align="center"
-        align="center"
-        width="50">
-      </el-table-column>
-      <el-table-column
-        prop="id"
-        header-align="center"
-        align="center"
-        label="主键">
-      </el-table-column>
-      <el-table-column
+      style="width: 40%;">
+      <table-tree-column
         prop="name"
         header-align="center"
-        align="center"
-        label="单位名称">
-      </el-table-column>
+        treeKey="id"
+        width="150"
+        label="名称">
+      </table-tree-column>
       <el-table-column
         prop="deptNum"
         header-align="center"
         align="center"
         label="单位编码">
-      </el-table-column>
-      <el-table-column
-        prop="parentId"
-        header-align="center"
-        align="center"
-        label="父机构id">
-      </el-table-column>
-      <el-table-column
-        prop="delFlag"
-        header-align="center"
-        align="center"
-        label="删除标志">
-      </el-table-column>
-      <el-table-column
-        prop="createBy"
-        header-align="center"
-        align="center"
-        label="创建人">
-      </el-table-column>
-      <el-table-column
-        prop="createTime"
-        header-align="center"
-        align="center"
-        label="创建时间">
-      </el-table-column>
-      <el-table-column
-        prop="modifyBy"
-        header-align="center"
-        align="center"
-        label="修改人">
-      </el-table-column>
-      <el-table-column
-        prop="modifyTime"
-        header-align="center"
-        align="center"
-        label="修改时间">
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -83,32 +35,28 @@
         width="150"
         label="操作">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
-          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
+          <el-button  type="text" size="small" @click="addHandle(scope.row.id, scope.row.schoolId)">新增</el-button>
+          <el-button v-if="scope.row.parentId!='-1'" type="text" size="small" @click="addOrUpdateHandle(scope.row.id,scope.row.parentId)">修改</el-button>
+          <el-button v-if="scope.row.parentId!='-1'" type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      @size-change="sizeChangeHandle"
-      @current-change="currentChangeHandle"
-      :current-page="pageIndex"
-      :page-sizes="[10, 20, 50, 100]"
-      :page-size="pageSize"
-      :total="totalPage"
-      layout="total, sizes, prev, pager, next, jumper">
-    </el-pagination>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
   </div>
 </template>
 
 <script>
+import TableTreeColumn from '@/components/table-tree-column'
+
 import AddOrUpdate from './dept-add-or-update'
+import { treeDataTranslate } from '@/utils'
+
 export default {
   data () {
     return {
       dataForm: {
-        key: ''
+        deptId: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -120,7 +68,8 @@ export default {
     }
   },
   components: {
-    AddOrUpdate
+    AddOrUpdate,
+    TableTreeColumn
   },
   activated () {
     this.getDataList()
@@ -130,20 +79,16 @@ export default {
     getDataList () {
       this.dataListLoading = true
       this.$http({
-        url: this.$http.adornUrl('/user/dept/list'),
+        url: this.$http.adornUrl('/user/dept/all'),
         method: 'get',
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          'key': this.dataForm.key
+          'deptId': this.dataForm.deptId
         })
       }).then(({data}) => {
         if (data && data.code === 0) {
-          this.dataList = data.page.list
-          this.totalPage = data.page.totalCount
-        } else {
-          this.dataList = []
-          this.totalPage = 0
+          this.dataList = treeDataTranslate(data.deptList, 'id')
         }
         this.dataListLoading = false
       })
@@ -162,6 +107,12 @@ export default {
     // 多选
     selectionChangeHandle (val) {
       this.dataListSelections = val
+    },
+    addHandle (id) {
+      this.addOrUpdateVisible = true
+      this.$nextTick(() => {
+        this.$refs.addOrUpdate.initAdd(id)
+      })
     },
     // 新增 / 修改
     addOrUpdateHandle (id) {

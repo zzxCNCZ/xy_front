@@ -7,7 +7,6 @@
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button v-if="isAuth('user:doctor:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('user:doctor:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -17,12 +16,7 @@
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
       <el-table-column
-        type="selection"
-        header-align="center"
-        align="center"
-        width="50">
-      </el-table-column>
-      <el-table-column
+        v-if="columnVisible"
         prop="id"
         header-align="center"
         align="center"
@@ -38,7 +32,10 @@
         prop="sex"
         header-align="center"
         align="center"
-        label="性别 0 男 1 女">
+        label="性别">
+        <template slot-scope="scope">
+          {{scope.row.sex | sexFilter}}
+        </template>
       </el-table-column>
       <el-table-column
         prop="age"
@@ -63,36 +60,9 @@
         header-align="center"
         align="center"
         label="职位">
-      </el-table-column>
-      <el-table-column
-        prop="delFlag"
-        header-align="center"
-        align="center"
-        label="删除标志">
-      </el-table-column>
-      <el-table-column
-        prop="createBy"
-        header-align="center"
-        align="center"
-        label="创建人">
-      </el-table-column>
-      <el-table-column
-        prop="createTime"
-        header-align="center"
-        align="center"
-        label="创建时间">
-      </el-table-column>
-      <el-table-column
-        prop="modifyBy"
-        header-align="center"
-        align="center"
-        label="修改人">
-      </el-table-column>
-      <el-table-column
-        prop="modifyTime"
-        header-align="center"
-        align="center"
-        label="修改时间">
+        <template slot-scope="scope">
+          {{scope.row.job | jobFilter}}
+        </template>
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -134,7 +104,8 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      columnVisible: false
     }
   },
   components: {
@@ -142,6 +113,30 @@ export default {
   },
   activated () {
     this.getDataList()
+  },
+  filters: {
+    sexFilter: sex => {
+      if (sex === 0) {
+        return '男'
+      } else if (sex === 1) {
+        return '女'
+      } else {
+        return '未知'
+      }
+    },
+    jobFilter: job => {
+      if (job === 'main') {
+        return '主治医师'
+      } else if (job === 'bed') {
+        return '管床医师'
+      } else if (job === 'nurse') {
+        return '护士'
+      } else if (job === 'chief') {
+        return '主任医师'
+      } else {
+        return '未知'
+      }
+    }
   },
   methods: {
     // 获取数据列表

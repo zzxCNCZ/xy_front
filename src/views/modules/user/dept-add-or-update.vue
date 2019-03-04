@@ -10,24 +10,27 @@
     <el-form-item label="单位编码" prop="deptNum">
       <el-input v-model="dataForm.deptNum" placeholder="单位编码"></el-input>
     </el-form-item>
-    <el-form-item label="父机构id" prop="parentId">
-      <el-input v-model="dataForm.parentId" placeholder="父机构id"></el-input>
-    </el-form-item>
-    <el-form-item label="删除标志" prop="delFlag">
-      <el-input v-model="dataForm.delFlag" placeholder="删除标志"></el-input>
-    </el-form-item>
-    <el-form-item label="创建人" prop="createBy">
-      <el-input v-model="dataForm.createBy" placeholder="创建人"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
-    <el-form-item label="修改人" prop="modifyBy">
-      <el-input v-model="dataForm.modifyBy" placeholder="修改人"></el-input>
-    </el-form-item>
-    <el-form-item label="修改时间" prop="modifyTime">
-      <el-input v-model="dataForm.modifyTime" placeholder="修改时间"></el-input>
-    </el-form-item>
+    <!--<el-form-item label="父机构id" prop="parentId">-->
+      <!--<el-input v-model="dataForm.parentId" placeholder="父机构id"></el-input>-->
+    <!--</el-form-item>-->
+      <el-form-item label="上级部门" prop="parentName">
+        <el-popover
+          ref="deptListPopover"
+          placement="bottom-start"
+          trigger="click">
+          <el-tree
+            :data="deptList"
+            :props="deptListTreeProps"
+            node-key="id"
+            ref="deptListTree"
+            @current-change="deptListTreeCurrentChangeHandle"
+            :default-expand-all="true"
+            :highlight-current="true"
+            :expand-on-click-node="false">
+          </el-tree>
+        </el-popover>
+        <el-input v-model="dataForm.parentName" v-popover:deptListPopover :readonly="true" placeholder="点击选择上级部门" class="menu-list__input"></el-input>
+      </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
@@ -37,6 +40,8 @@
 </template>
 
 <script>
+import { treeDataTranslate } from '@/utils'
+
 export default {
   data () {
     return {
@@ -46,11 +51,7 @@ export default {
         name: '',
         deptNum: '',
         parentId: '',
-        delFlag: '',
-        createBy: '',
-        createTime: '',
-        modifyBy: '',
-        modifyTime: ''
+        parentName: ''
       },
       dataRule: {
         name: [
@@ -61,31 +62,52 @@ export default {
         ],
         parentId: [
           { required: true, message: '父机构id不能为空', trigger: 'blur' }
-        ],
-        delFlag: [
-          { required: true, message: '删除标志不能为空', trigger: 'blur' }
-        ],
-        createBy: [
-          { required: true, message: '创建人不能为空', trigger: 'blur' }
-        ],
-        createTime: [
-          { required: true, message: '创建时间不能为空', trigger: 'blur' }
-        ],
-        modifyBy: [
-          { required: true, message: '修改人不能为空', trigger: 'blur' }
-        ],
-        modifyTime: [
-          { required: true, message: '修改时间不能为空', trigger: 'blur' }
         ]
+      },
+      deptList: [],
+      deptListTreeProps: {
+        label: 'name',
+        children: 'children'
       }
     }
   },
+  computed: {
+    userName: {
+      get () { return this.$store.state.user.name }
+    }
+  },
   methods: {
+    // 单位数选中
+    deptListTreeCurrentChangeHandle (data, node) {
+      this.dataForm.parentId = data.id
+      this.dataForm.parentName = data.name
+    },
+    // 单位树设置当前选中节点
+    deptListTreeSetCurrentNode () {
+      this.$refs.deptListTree.setCurrentKey(this.dataForm.parentId)
+      this.dataForm.parentName = (this.$refs.deptListTree.getCurrentNode() || {})['name']
+    },
+    initAdd (parentId) {
+      console.log(parentId)
+      this.dataForm.parentId = parentId
+      this.init(0)
+    },
     init (id) {
       this.dataForm.id = id || 0
       this.visible = true
-      this.$nextTick(() => {
-        this.$refs['dataForm'].resetFields()
+      this.$http({
+        url: this.$http.adornUrl('/user/dept/all'),
+        method: 'get',
+        params: this.$http.adornParams({
+          'deptId': this.dataForm.deptId
+        })
+      }).then(({data}) => {
+        this.deptList = treeDataTranslate(data.deptList, 'id')
+      }).then(() => {
+        this.$nextTick(() => {
+          this.$refs['dataForm'].resetFields()
+        })
+      }).then(() => {
         if (this.dataForm.id) {
           this.$http({
             url: this.$http.adornUrl(`/user/dept/info/${this.dataForm.id}`),
@@ -96,13 +118,12 @@ export default {
               this.dataForm.name = data.dept.name
               this.dataForm.deptNum = data.dept.deptNum
               this.dataForm.parentId = data.dept.parentId
-              this.dataForm.delFlag = data.dept.delFlag
               this.dataForm.createBy = data.dept.createBy
-              this.dataForm.createTime = data.dept.createTime
-              this.dataForm.modifyBy = data.dept.modifyBy
-              this.dataForm.modifyTime = data.dept.modifyTime
+              this.deptListTreeSetCurrentNode()
             }
           })
+        } else {
+          this.deptListTreeSetCurrentNode()
         }
       })
     },
@@ -118,11 +139,7 @@ export default {
               'name': this.dataForm.name,
               'deptNum': this.dataForm.deptNum,
               'parentId': this.dataForm.parentId,
-              'delFlag': this.dataForm.delFlag,
-              'createBy': this.dataForm.createBy,
-              'createTime': this.dataForm.createTime,
-              'modifyBy': this.dataForm.modifyBy,
-              'modifyTime': this.dataForm.modifyTime
+              'createBy': this.userName
             })
           }).then(({data}) => {
             if (data && data.code === 0) {
