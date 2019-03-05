@@ -4,9 +4,9 @@
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="病人id" prop="patientId">
-      <el-input v-model="dataForm.patientId" placeholder="病人id"></el-input>
-    </el-form-item>
+    <!--<el-form-item label="病人id" prop="patientId">-->
+      <!--<el-input v-model="dataForm.patientId" placeholder="病人id"></el-input>-->
+    <!--</el-form-item>-->
     <el-form-item label="床号" prop="bedNum">
       <el-input v-model="dataForm.bedNum" placeholder="床号"></el-input>
     </el-form-item>
@@ -28,30 +28,15 @@
     <el-form-item label="主任医师" prop="chiefDoctor">
       <el-input v-model="dataForm.chiefDoctor" placeholder="主任医师"></el-input>
     </el-form-item>
-    <el-form-item label="是否出院 1 出院  0 未出院" prop="status">
-      <el-input v-model="dataForm.status" placeholder="是否出院 1 出院  0 未出院"></el-input>
-    </el-form-item>
-    <el-form-item label="入院日期" prop="startTime">
-      <el-input v-model="dataForm.startTime" placeholder="入院日期"></el-input>
-    </el-form-item>
-    <el-form-item label="出院日期" prop="endTime">
-      <el-input v-model="dataForm.endTime" placeholder="出院日期"></el-input>
-    </el-form-item>
-    <el-form-item label="删除标志" prop="delFalg">
-      <el-input v-model="dataForm.delFlag" placeholder="删除标志"></el-input>
-    </el-form-item>
-    <el-form-item label="创建人" prop="createBy">
-      <el-input v-model="dataForm.createBy" placeholder="创建人"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
-    <el-form-item label="修改任" prop="modifyBy">
-      <el-input v-model="dataForm.modifyBy" placeholder="修改任"></el-input>
-    </el-form-item>
-    <el-form-item label="修改时间" prop="modifyTime">
-      <el-input v-model="dataForm.modifyTime" placeholder="修改时间"></el-input>
-    </el-form-item>
+    <!--<el-form-item label="是否出院 1 出院  0 未出院" prop="status">-->
+      <!--<el-input v-model="dataForm.status" placeholder="是否出院 1 出院  0 未出院"></el-input>-->
+    <!--</el-form-item>-->
+    <!--<el-form-item label="入院日期" prop="startTime">-->
+      <!--<el-input v-model="dataForm.startTime" placeholder="入院日期"></el-input>-->
+    <!--</el-form-item>-->
+    <!--<el-form-item label="出院日期" prop="endTime">-->
+      <!--<el-input v-model="dataForm.endTime" placeholder="出院日期"></el-input>-->
+    <!--</el-form-item>-->
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
@@ -125,6 +110,7 @@ export default {
     initRecord (patientId) {
       this.dataForm.patientId = patientId
       this.visible = true
+      this.init(0)
     },
     init (id) {
       this.dataForm.id = id || 0
@@ -149,11 +135,6 @@ export default {
               this.dataForm.status = data.patientRecord.status
               this.dataForm.startTime = data.patientRecord.startTime
               this.dataForm.endTime = data.patientRecord.endTime
-              this.dataForm.delFlag = data.patientRecord.delFlag
-              this.dataForm.createBy = data.patientRecord.createBy
-              this.dataForm.createTime = data.patientRecord.createTime
-              this.dataForm.modifyBy = data.patientRecord.modifyBy
-              this.dataForm.modifyTime = data.patientRecord.modifyTime
             }
           })
         }
@@ -178,12 +159,7 @@ export default {
               'chiefDoctor': this.dataForm.chiefDoctor,
               'status': this.dataForm.status,
               'startTime': this.dataForm.startTime,
-              'endTime': this.dataForm.endTime,
-              'delFlag': this.dataForm.delFlag,
-              'createBy': this.dataForm.createBy,
-              'createTime': this.dataForm.createTime,
-              'modifyBy': this.dataForm.modifyBy,
-              'modifyTime': this.dataForm.modifyTime
+              'endTime': this.dataForm.endTime
             })
           }).then(({data}) => {
             if (data && data.code === 0) {
