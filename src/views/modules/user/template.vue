@@ -2,12 +2,11 @@
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @submit.native.prevent  @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
+        <el-input v-model="dataForm.title" placeholder="标题名称" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button v-if="isAuth('user:template:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button v-if="isAuth('user:template:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -17,64 +16,10 @@
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
       <el-table-column
-        type="selection"
-        header-align="center"
-        align="center"
-        width="50">
-      </el-table-column>
-      <el-table-column
-        prop="id"
-        header-align="center"
-        align="center"
-        label="主键">
-      </el-table-column>
-      <el-table-column
-        prop="doctorId"
-        header-align="center"
-        align="center"
-        label="医生ID">
-      </el-table-column>
-      <el-table-column
         prop="title"
         header-align="center"
         align="center"
         label="标题">
-      </el-table-column>
-      <el-table-column
-        prop="content"
-        header-align="center"
-        align="center"
-        label="内容">
-      </el-table-column>
-      <el-table-column
-        prop="delFlag"
-        header-align="center"
-        align="center"
-        label="删除标志">
-      </el-table-column>
-      <el-table-column
-        prop="createBy"
-        header-align="center"
-        align="center"
-        label="创建人">
-      </el-table-column>
-      <el-table-column
-        prop="createTime"
-        header-align="center"
-        align="center"
-        label="创建时间">
-      </el-table-column>
-      <el-table-column
-        prop="modifyBy"
-        header-align="center"
-        align="center"
-        label="修改人">
-      </el-table-column>
-      <el-table-column
-        prop="modifyTime"
-        header-align="center"
-        align="center"
-        label="">
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -108,7 +53,7 @@ export default {
   data () {
     return {
       dataForm: {
-        key: ''
+        title: ''
       },
       dataList: [],
       pageIndex: 1,

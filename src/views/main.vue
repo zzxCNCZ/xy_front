@@ -44,6 +44,10 @@ export default {
     userName: {
       get () { return this.$store.state.user.name },
       set (val) { this.$store.commit('user/updateName', val) }
+    },
+    doctorId: {
+      get () { return this.$store.state.user.doctorId },
+      set (val) { this.$store.commit('user/updateDoctorId', val) }
     }
   },
   created () {
@@ -71,6 +75,7 @@ export default {
           this.loading = false
           this.userId = data.user.sysUserEntity.userId
           this.userName = data.user.doctorEntity.name
+          this.doctorId = data.user.doctorEntity.id
         }
       })
     }

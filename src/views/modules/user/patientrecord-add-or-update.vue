@@ -20,13 +20,34 @@
       <el-input v-model="dataForm.nurseLevel" placeholder="护理级别"></el-input>
     </el-form-item>
     <el-form-item label="管床医师" prop="bedDoctor">
-      <el-input v-model="dataForm.bedDoctor" placeholder="管床医师"></el-input>
+      <el-select v-model="dataForm.bedDoctor" style="display: grid"   placeholder="请选择">
+        <el-option
+          v-for="item in bedDoctorOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
     </el-form-item>
     <el-form-item label="主治医师" prop="mainDoctor">
-      <el-input v-model="dataForm.mainDoctor" placeholder="主治医师"></el-input>
+      <el-select v-model="dataForm.mainDoctor" style="display: grid"   placeholder="请选择">
+        <el-option
+          v-for="item in mainDoctorOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
     </el-form-item>
     <el-form-item label="主任医师" prop="chiefDoctor">
-      <el-input v-model="dataForm.chiefDoctor" placeholder="主任医师"></el-input>
+      <el-select v-model="dataForm.chiefDoctor" style="display: grid"   placeholder="请选择">
+        <el-option
+          v-for="item in chiefDoctorOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
     </el-form-item>
     <!--<el-form-item label="是否出院 1 出院  0 未出院" prop="status">-->
       <!--<el-input v-model="dataForm.status" placeholder="是否出院 1 出院  0 未出院"></el-input>-->
@@ -69,6 +90,9 @@ export default {
         modifyBy: '',
         modifyTime: ''
       },
+      bedDoctorOptions: [],
+      mainDoctorOptions: [],
+      chiefDoctorOptions: [],
       dataRule: {
         patientId: [
           { required: true, message: '病人id不能为空', trigger: 'blur' }
@@ -115,6 +139,9 @@ export default {
     init (id) {
       this.dataForm.id = id || 0
       this.visible = true
+      this.getBedDoctorOption()
+      this.getMainDoctorOption()
+      this.getChiefDoctorOption()
       this.$nextTick(() => {
         this.$refs['dataForm'].resetFields()
         if (this.dataForm.id) {
@@ -138,6 +165,57 @@ export default {
             }
           })
         }
+      })
+    },
+    getBedDoctorOption () {
+      this.bedDoctorOptions = []
+      this.$http({
+        url: this.$http.adornUrl('/user/doctor/getDoctorByJob'),
+        method: 'get',
+        params: this.$http.adornParams({
+          job: 'bed'
+        })
+      }).then(({data}) => {
+        data.doctor.map(item => {
+          let option = {}
+          option.value = item.id
+          option.label = item.name
+          this.bedDoctorOptions.push(option)
+        })
+      })
+    },
+    getMainDoctorOption () {
+      this.mainDoctorOptions = []
+      this.$http({
+        url: this.$http.adornUrl('/user/doctor/getDoctorByJob'),
+        method: 'get',
+        params: this.$http.adornParams({
+          job: 'main'
+        })
+      }).then(({data}) => {
+        data.doctor.map(item => {
+          let option = {}
+          option.value = item.id
+          option.label = item.name
+          this.mainDoctorOptions.push(option)
+        })
+      })
+    },
+    getChiefDoctorOption () {
+      this.chiefDoctorOptions = []
+      this.$http({
+        url: this.$http.adornUrl('/user/doctor/getDoctorByJob'),
+        method: 'get',
+        params: this.$http.adornParams({
+          job: 'chief'
+        })
+      }).then(({data}) => {
+        data.doctor.map(item => {
+          let option = {}
+          option.value = item.id
+          option.label = item.name
+          this.chiefDoctorOptions.push(option)
+        })
       })
     },
     // 表单提交
