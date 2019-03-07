@@ -13,9 +13,25 @@
     <el-form-item label="住院号" prop="inpatientNum">
       <el-input v-model="dataForm.inpatientNum" placeholder="住院号"></el-input>
     </el-form-item>
-    <el-form-item label="科室(单位编码)" prop="deptNum">
-      <el-input v-model="dataForm.deptNum" placeholder="科室(单位编码)"></el-input>
-    </el-form-item>
+    <el-form-item label="科室" prop="deptNum">
+        <el-popover
+          ref="deptListPopover"
+          placement="bottom-start"
+          trigger="click">
+          <el-tree
+            :data="deptList"
+            :props="deptListTreeProps"
+            node-key="id"
+            ref="deptListTree"
+            @current-change="deptListTreeCurrentChangeHandle"
+            :default-expand-all="true"
+            :highlight-current="true"
+            :expand-on-click-node="false">
+          </el-tree>
+        </el-popover>
+        <el-input v-model="dataForm.deptName" v-popover:deptListPopover :readonly="true" placeholder="点击选择科室" class="menu-list__input"></el-input>
+      </el-form-item>
+      <!--<el-input v-model="dataForm.deptNum" placeholder="科室(单位编码)"></el-input>-->
     <el-form-item label="护理级别" prop="nurseLevel">
       <el-input v-model="dataForm.nurseLevel" placeholder="护理级别"></el-input>
     </el-form-item>
@@ -67,6 +83,8 @@
 </template>
 
 <script>
+import { treeDataTranslate } from '@/utils'
+
 export default {
   data () {
     return {
@@ -84,15 +102,17 @@ export default {
         status: '',
         startTime: '',
         endTime: '',
-        delFlag: '',
         createBy: '',
-        createTime: '',
-        modifyBy: '',
-        modifyTime: ''
+        deptName: ''
       },
       bedDoctorOptions: [],
       mainDoctorOptions: [],
       chiefDoctorOptions: [],
+      deptList: [],
+      deptListTreeProps: {
+        label: 'name',
+        children: 'children'
+      },
       dataRule: {
         patientId: [
           { required: true, message: '病人id不能为空', trigger: 'blur' }
@@ -131,6 +151,16 @@ export default {
     }
   },
   methods: {
+    // 单位数选中
+    deptListTreeCurrentChangeHandle (data, node) {
+      this.dataForm.deptNum = data.id
+      this.dataForm.deptName = data.name
+    },
+    // 单位树设置当前选中节点
+    deptListTreeSetCurrentNode () {
+      this.$refs.deptListTree.setCurrentKey(this.dataForm.deptNum)
+      this.dataForm.deptName = (this.$refs.deptListTree.getCurrentNode() || {})['name']
+    },
     initRecord (patientId) {
       this.dataForm.patientId = patientId
       this.visible = true
@@ -142,8 +172,19 @@ export default {
       this.getBedDoctorOption()
       this.getMainDoctorOption()
       this.getChiefDoctorOption()
-      this.$nextTick(() => {
-        this.$refs['dataForm'].resetFields()
+      this.$http({
+        url: this.$http.adornUrl('/user/dept/all'),
+        method: 'get',
+        params: this.$http.adornParams({
+          'deptId': this.dataForm.deptNum
+        })
+      }).then(({data}) => {
+        this.deptList = treeDataTranslate(data.deptList, 'id')
+      }).then(() => {
+        this.$nextTick(() => {
+          this.$refs['dataForm'].resetFields()
+        })
+      }).then(() => {
         if (this.dataForm.id) {
           this.$http({
             url: this.$http.adornUrl(`/user/patientrecord/info/${this.dataForm.id}`),
