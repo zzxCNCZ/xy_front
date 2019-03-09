@@ -2,34 +2,25 @@
   <el-dialog
     :title="!dataForm.id ? '新增' : '修改'"
     :close-on-click-modal="false"
+    :fullscreen="true"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="病人记录ID" prop="patientRecordId">
-      <el-input v-model="dataForm.patientRecordId" placeholder="病人记录ID"></el-input>
-    </el-form-item>
-    <el-form-item label="医生ID" prop="doctorId">
-      <el-input v-model="dataForm.doctorId" placeholder="医生ID"></el-input>
-    </el-form-item>
     <el-form-item label="标题" prop="title">
       <el-input v-model="dataForm.title" placeholder="标题"></el-input>
     </el-form-item>
+    <el-form-item label="病历模版" >
+        <el-select v-model="dataForm.template"  filterable clearable  placeholder="类型">
+          <el-option
+            v-for="item in templateOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      <el-button @click="loadTemplate()">加载模版</el-button>
+     </el-form-item>
     <el-form-item label="诊断记录" prop="content">
-      <el-input v-model="dataForm.content" placeholder="诊断记录"></el-input>
-    </el-form-item>
-    <el-form-item label="删除标志" prop="delFlag">
-      <el-input v-model="dataForm.delFlag" placeholder="删除标志"></el-input>
-    </el-form-item>
-    <el-form-item label="创建人" prop="createBy">
-      <el-input v-model="dataForm.createBy" placeholder="创建人"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
-    <el-form-item label="修改人" prop="modifyBy">
-      <el-input v-model="dataForm.modifyBy" placeholder="修改人"></el-input>
-    </el-form-item>
-    <el-form-item label="修改时间" prop="modifyTime">
-      <el-input v-model="dataForm.modifyTime" placeholder="修改时间"></el-input>
+        <vue-ueditor-wrap  :config="ueConfig"  v-model="dataForm.content"></vue-ueditor-wrap>
     </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -40,9 +31,21 @@
 </template>
 
 <script>
+import VueUeditorWrap from 'vue-ueditor-wrap'
 export default {
   data () {
     return {
+      ueConfig: {
+        zIndex: 2999,
+        toolbars: [
+          ['undo', 'redo', 'indent', 'bold', 'italic', '|', 'fontfamily', 'fontsize', '|', 'template'],
+          ['justifyleft', 'justifyright', 'justifycenter', 'justifyjustify', 'print', 'preview']
+        ],
+        // theme: 'gray',
+        elementPathEnabled: false,
+        wordCount: false,
+        serverUrl: ''
+      },
       visible: false,
       dataForm: {
         id: 0,
@@ -54,8 +57,10 @@ export default {
         createBy: '',
         createTime: '',
         modifyBy: '',
-        modifyTime: ''
+        modifyTime: '',
+        template: ''
       },
+      templateOptions: [],
       dataRule: {
         patientRecordId: [
           { required: true, message: '病人记录ID不能为空', trigger: 'blur' }
@@ -68,26 +73,32 @@ export default {
         ],
         content: [
           { required: true, message: '诊断记录不能为空', trigger: 'blur' }
-        ],
-        delFlag: [
-          { required: true, message: '删除标志不能为空', trigger: 'blur' }
-        ],
-        createBy: [
-          { required: true, message: '创建人不能为空', trigger: 'blur' }
-        ],
-        createTime: [
-          { required: true, message: '创建时间不能为空', trigger: 'blur' }
-        ],
-        modifyBy: [
-          { required: true, message: '修改人不能为空', trigger: 'blur' }
-        ],
-        modifyTime: [
-          { required: true, message: '修改时间不能为空', trigger: 'blur' }
         ]
       }
     }
   },
+  components: {
+    VueUeditorWrap
+  },
+  computed: {
+    record: {
+      get () { return this.$store.state.templates.record }
+    },
+    doctorId: {
+      get () { return this.$store.state.user.doctorId }
+    },
+    userName: {
+      get () { return this.$store.state.user.name }
+    }
+  },
+  created () {
+    this.getTemplateOption()
+  },
   methods: {
+    initAddDiagnose (recordId) {
+      this.dataForm.patientRecordId = recordId
+      this.init(0)
+    },
     init (id) {
       this.dataForm.id = id || 0
       this.visible = true
@@ -106,12 +117,33 @@ export default {
               this.dataForm.content = data.patientDiagnose.content
               this.dataForm.delFlag = data.patientDiagnose.delFlag
               this.dataForm.createBy = data.patientDiagnose.createBy
-              this.dataForm.createTime = data.patientDiagnose.createTime
-              this.dataForm.modifyBy = data.patientDiagnose.modifyBy
-              this.dataForm.modifyTime = data.patientDiagnose.modifyTime
             }
           })
         }
+      })
+    },
+    loadTemplate () {
+      if (this.dataForm.template === '') {
+        this.$message.error('请先选择模版！')
+      } else {
+        this.dataForm.content = this.dataForm.template
+      }
+    },
+    getTemplateOption () {
+      this.templateOptions = []
+      this.$http({
+        url: this.$http.adornUrl('/user/template/getTemplateByDoctorId'),
+        method: 'get',
+        params: this.$http.adornParams({
+          'doctorId': this.doctorId
+        })
+      }).then(({data}) => {
+        data.templateList.map(item => {
+          let option = {}
+          option.value = item.content
+          option.label = item.title
+          this.templateOptions.push(option)
+        })
       })
     },
     // 表单提交
@@ -124,14 +156,10 @@ export default {
             data: this.$http.adornData({
               'id': this.dataForm.id || undefined,
               'patientRecordId': this.dataForm.patientRecordId,
-              'doctorId': this.dataForm.doctorId,
+              'doctorId': this.doctorId,
               'title': this.dataForm.title,
               'content': this.dataForm.content,
-              'delFlag': this.dataForm.delFlag,
-              'createBy': this.dataForm.createBy,
-              'createTime': this.dataForm.createTime,
-              'modifyBy': this.dataForm.modifyBy,
-              'modifyTime': this.dataForm.modifyTime
+              'createBy': this.userName
             })
           }).then(({data}) => {
             if (data && data.code === 0) {

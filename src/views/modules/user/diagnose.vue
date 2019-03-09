@@ -1,12 +1,19 @@
 <template>
+  <el-dialog
+    :title="!dataForm.id ? '病历记录' : '修改'"
+    :close-on-click-modal="false"
+    :visible.sync="visible"
+    width="70%"
+    append-to-body
+  >
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @submit.native.prevent  @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.title" placeholder="标题名称" clearable></el-input>
+        <el-input v-model="dataForm.title" placeholder="参数名" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
-        <el-button v-if="isAuth('user:template:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <!--<el-button v-if="isAuth('user:patientdiagnose:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
       </el-form-item>
     </el-form>
     <el-table
@@ -15,11 +22,35 @@
       v-loading="dataListLoading"
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
+      <!--<el-table-column-->
+        <!--prop="patientRecordId"-->
+        <!--header-align="center"-->
+        <!--align="center"-->
+        <!--label="病人记录ID">-->
+      <!--</el-table-column>-->
+      <!--<el-table-column-->
+        <!--prop="doctorId"-->
+        <!--header-align="center"-->
+        <!--align="center"-->
+        <!--label="医生ID">-->
+      <!--</el-table-column>-->
       <el-table-column
         prop="title"
         header-align="center"
         align="center"
         label="标题">
+      </el-table-column>
+      <el-table-column
+        prop="createBy"
+        header-align="center"
+        align="center"
+        label="创建人">
+      </el-table-column>
+      <el-table-column
+        prop="createTime"
+        header-align="center"
+        align="center"
+        label="时间">
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -45,15 +76,17 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
   </div>
+  </el-dialog>
 </template>
 
 <script>
-import AddOrUpdate from './template-add-or-update'
+import AddOrUpdate from './patientdiagnose-add-or-update'
 export default {
   data () {
     return {
       dataForm: {
-        title: ''
+        title: '',
+        recordId: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -61,31 +94,32 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      visible: false
     }
   },
   components: {
     AddOrUpdate
   },
   activated () {
-    this.getDataList()
-  },
-  computed: {
-    doctorId: {
-      get () { return this.$store.state.user.doctorId }
-    }
+    // this.getDataList()
   },
   methods: {
+    initDiagnoseList (recordId) {
+      this.dataForm.recordId = recordId
+      this.getDataList()
+    },
     // 获取数据列表
     getDataList () {
+      this.visible = true
       this.dataListLoading = true
       this.$http({
-        url: this.$http.adornUrl('/user/template/list'),
+        url: this.$http.adornUrl('/user/patientdiagnose/list'),
         method: 'get',
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          'doctorId': this.doctorId
+          'recordId': this.dataForm.recordId
         })
       }).then(({data}) => {
         if (data && data.code === 0) {
@@ -131,7 +165,7 @@ export default {
         type: 'warning'
       }).then(() => {
         this.$http({
-          url: this.$http.adornUrl('/user/template/delete'),
+          url: this.$http.adornUrl('/user/patientdiagnose/delete'),
           method: 'post',
           data: this.$http.adornData(ids, false)
         }).then(({data}) => {

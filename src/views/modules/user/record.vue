@@ -1,12 +1,19 @@
 <template>
+  <el-dialog
+    :title="!dataForm.id ? '住院记录' : '修改'"
+    :close-on-click-modal="false"
+    :visible.sync="visible"
+    width="70%"
+    append-to-body
+  >
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @submit.native.prevent  @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.title" placeholder="标题名称" clearable></el-input>
+        <el-input v-model="dataForm.patientId" placeholder="参数名" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
-        <el-button v-if="isAuth('user:template:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <el-button v-if="isAuth('user:patientrecord:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -16,10 +23,79 @@
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
       <el-table-column
-        prop="title"
+        prop="bedNum"
         header-align="center"
         align="center"
-        label="标题">
+        label="床号">
+      </el-table-column>
+      <el-table-column
+        prop="inpatientNum"
+        header-align="center"
+        align="center"
+        label="住院号">
+      </el-table-column>
+      <el-table-column
+        prop="deptNum"
+        header-align="center"
+        align="center"
+        label="科室(单位编码)">
+      </el-table-column>
+      <el-table-column
+        prop="nurseLevel"
+        header-align="center"
+        align="center"
+        label="护理级别">
+      </el-table-column>
+      <el-table-column
+        prop="bedDoctor"
+        header-align="center"
+        align="center"
+        label="管床医师">
+      </el-table-column>
+      <el-table-column
+        prop="mainDoctor"
+        header-align="center"
+        align="center"
+        label="主治医师">
+      </el-table-column>
+      <el-table-column
+        prop="chiefDoctor"
+        header-align="center"
+        align="center"
+        label="主任医师">
+      </el-table-column>
+      <el-table-column
+        prop="status"
+        header-align="center"
+        align="center"
+        label="是否出院">
+        <template slot-scope="scope">
+          {{scope.row.status | statusFilter}}
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="startTime"
+        header-align="center"
+        align="center"
+        label="入院日期">
+      </el-table-column>
+      <el-table-column
+        prop="endTime"
+        header-align="center"
+        align="center"
+        label="出院日期">
+      </el-table-column>
+      <el-table-column
+        prop="createBy"
+        header-align="center"
+        align="center"
+        label="创建人">
+      </el-table-column>
+      <el-table-column
+        prop="createTime"
+        header-align="center"
+        align="center"
+        label="创建时间">
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -45,15 +121,16 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
   </div>
+  </el-dialog>
 </template>
 
 <script>
-import AddOrUpdate from './template-add-or-update'
+import AddOrUpdate from './patientrecord-add-or-update'
 export default {
   data () {
     return {
       dataForm: {
-        title: ''
+        patientId: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -61,31 +138,41 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      visible: false
     }
   },
   components: {
     AddOrUpdate
   },
   activated () {
-    this.getDataList()
+    // this.getDataList()
   },
-  computed: {
-    doctorId: {
-      get () { return this.$store.state.user.doctorId }
+  filters: {
+    statusFilter: status => {
+      if (status === 1) {
+        return '是'
+      } else {
+        return '否'
+      }
     }
   },
   methods: {
+    initRecordList (patientId) {
+      this.dataForm.patientId = patientId
+      this.getDataList()
+    },
     // 获取数据列表
     getDataList () {
+      this.visible = true
       this.dataListLoading = true
       this.$http({
-        url: this.$http.adornUrl('/user/template/list'),
+        url: this.$http.adornUrl('/user/patientrecord/list'),
         method: 'get',
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          'doctorId': this.doctorId
+          'patientId': this.dataForm.patientId
         })
       }).then(({data}) => {
         if (data && data.code === 0) {
@@ -131,7 +218,7 @@ export default {
         type: 'warning'
       }).then(() => {
         this.$http({
-          url: this.$http.adornUrl('/user/template/delete'),
+          url: this.$http.adornUrl('/user/patientrecord/delete'),
           method: 'post',
           data: this.$http.adornData(ids, false)
         }).then(({data}) => {

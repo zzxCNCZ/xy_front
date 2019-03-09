@@ -120,8 +120,29 @@
         width="150"
         label="手续">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="addRecordHandle(scope.row.id)">入院</el-button>
-          <el-button type="text" size="small" @click="deleteHandle(scope.row.id)">住院记录</el-button>
+          <el-button v-if="scope.row.status===null" type="text" size="small" @click="addRecordHandle(scope.row.id)">入院</el-button>
+          <el-button v-else type="text" size="small" @click="checkOutHandle(scope.row.recordId)">出院</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
+        label="病历">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="addDiagnose(scope.row.recordId)">填写</el-button>
+          <el-button type="text" size="small" @click="getDiagnoseList(scope.row.recordId)">历史记录</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
+        label="住院记录">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="getRecordList(scope.row.id)">历史记录</el-button>
         </template>
       </el-table-column>
       <el-table-column
@@ -149,12 +170,26 @@
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
     <!-- 新增入院记录-->
     <add-patient-record v-if="addPatientRecordVisible" ref="addPatientRecord" @refreshDataList="getDataList"></add-patient-record>
+
+    <!-- 新增病历-->
+    <add-diagnose v-if="addDiagnoseVisible" ref="addDiagnose" @refreshDataList="getDataList"></add-diagnose>
+    <!-- 病历历史-->
+    <diagnose-list v-if="diagnoseListVisible" ref="diagnoseList" @refreshDataList="getDataList"></diagnose-list>
+    <!-- 入院历史记录-->
+    <record-list v-if="recordListVisible" ref="recordList" @refreshDataList="getDataList"></record-list>
+
   </div>
 </template>
 
 <script>
 import AddOrUpdate from './patient-add-or-update'
 import AddPatientRecord from './patientrecord-add-or-update'
+
+import AddDiagnose from './patientdiagnose-add-or-update'
+
+import DiagnoseList from './diagnose'
+import RecordList from './record'
+
 export default {
   data () {
     return {
@@ -169,12 +204,18 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
-      addPatientRecordVisible: false
+      addPatientRecordVisible: false,
+      diagnoseListVisible: false,
+      recordListVisible: false,
+      addDiagnoseVisible: false
     }
   },
   components: {
     AddOrUpdate,
-    AddPatientRecord
+    AddPatientRecord,
+    DiagnoseList,
+    AddDiagnose,
+    RecordList
   },
   activated () {
     this.getDataList()
@@ -216,6 +257,48 @@ export default {
     // 多选
     selectionChangeHandle (val) {
       this.dataListSelections = val
+    },
+    // 填写病历
+    addDiagnose (recordId) {
+      this.addDiagnoseVisible = true
+      this.$nextTick(() => {
+        this.$refs.addDiagnose.initAddDiagnose(recordId)
+      })
+    },
+    // 病历记录
+    getDiagnoseList (recordId) {
+      this.diagnoseListVisible = true
+      this.$nextTick(() => {
+        this.$refs.diagnoseList.initDiagnoseList(recordId)
+      })
+    },
+    // 出院
+    checkOutHandle (recordId) {
+      this.$http({
+        url: this.$http.adornUrl(`/user/patientrecord/checkOut/${recordId}`),
+        method: 'get',
+        params: this.$http.adornParams()
+      }).then(({data}) => {
+        if (data && data.code === 0) {
+          this.$message({
+            message: '操作成功',
+            type: 'success',
+            duration: 1500,
+            onClose: () => {
+              this.getDataList()
+            }
+          })
+        } else {
+          this.$message.error(data.msg)
+        }
+      })
+    },
+    // 住院记录
+    getRecordList (patientId) {
+      this.recordListVisible = true
+      this.$nextTick(() => {
+        this.$refs.recordList.initRecordList(patientId)
+      })
     },
     addRecordHandle (id) {
       this.addPatientRecordVisible = true
