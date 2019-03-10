@@ -2,7 +2,7 @@
   <div class="site-wrapper site-page--login">
     <el-row style="margin-top: 150px;">
       <el-col :span="8" :offset="8">
-        <h1 style="text-align: center;color: white">Front Original</h1>
+        <h1 style="text-align: center;color: white">电子病历管理系统</h1>
       </el-col>
       <el-col :span="8" :offset="8">
         <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" status-icon>
@@ -115,7 +115,7 @@ export default {
       /*
             background-image: url(~@/assets/img/login_bg.jpg);
       */
-      background-image: url(~@/assets/img/loginback2.jpg);
+      background-image: url(~@/assets/img/login.jpg);
       background-size: auto;
     }
     .site-content__wrapper {

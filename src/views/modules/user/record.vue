@@ -102,6 +102,16 @@
         header-align="center"
         align="center"
         width="150"
+        label="病历">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.status!==null" type="text" size="small" @click="getDiagnoseList(scope.row.id)">历史记录</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
         label="操作">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">修改</el-button>
@@ -120,12 +130,16 @@
     </el-pagination>
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
+    <!-- 病历历史-->
+    <diagnose-list v-if="diagnoseListVisible" ref="diagnoseList" @refreshDataList="getDataList"></diagnose-list>
   </div>
   </el-dialog>
 </template>
 
 <script>
 import AddOrUpdate from './patientrecord-add-or-update'
+import DiagnoseList from './diagnose'
+
 export default {
   data () {
     return {
@@ -139,11 +153,13 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
-      visible: false
+      visible: false,
+      diagnoseListVisible: false
     }
   },
   components: {
-    AddOrUpdate
+    AddOrUpdate,
+    DiagnoseList
   },
   activated () {
     // this.getDataList()
@@ -161,6 +177,13 @@ export default {
     initRecordList (patientId) {
       this.dataForm.patientId = patientId
       this.getDataList()
+    },
+    // 病历记录
+    getDiagnoseList (recordId) {
+      this.diagnoseListVisible = true
+      this.$nextTick(() => {
+        this.$refs.diagnoseList.initDiagnoseList(recordId)
+      })
     },
     // 获取数据列表
     getDataList () {

@@ -7,13 +7,20 @@
     <el-form-item label="姓名" prop="name">
       <el-input v-model="dataForm.name" placeholder="姓名"></el-input>
     </el-form-item>
-    <el-form-item label="性别(默认为0，0：男，1：女)" prop="sex">
-      <el-input v-model="dataForm.sex" placeholder="性别(默认为0，0：男，1：女)"></el-input>
-    </el-form-item>
+      <el-form-item label="性别" prop="sex">
+        <el-select v-model="dataForm.sex"  filterable clearable  placeholder="性别">
+          <el-option
+            v-for="item in sexOption"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
     <el-form-item label="年龄" prop="age">
       <el-input v-model="dataForm.age" placeholder="年龄"></el-input>
     </el-form-item>
-    <el-form-item label="身份证号码" prop="idNumber">
+    <el-form-item label="身份证" prop="idNumber">
       <el-input v-model="dataForm.idNumber" placeholder="身份证号码"></el-input>
     </el-form-item>
     <el-form-item label="家庭住址" prop="address">
@@ -28,21 +35,6 @@
     <el-form-item label="紧急联系人电话" prop="emergencyConnectMobile">
       <el-input v-model="dataForm.emergencyConnectMobile" placeholder="紧急联系人电话"></el-input>
     </el-form-item>
-    <el-form-item label="删除标志" prop="delFlag">
-      <el-input v-model="dataForm.delFlag" placeholder="删除标志"></el-input>
-    </el-form-item>
-    <el-form-item label="创建人" prop="createBy">
-      <el-input v-model="dataForm.createBy" placeholder="创建人"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
-    <el-form-item label="修改人" prop="modifyBy">
-      <el-input v-model="dataForm.modifyBy" placeholder="修改人"></el-input>
-    </el-form-item>
-    <el-form-item label="修改时间" prop="modifyTime">
-      <el-input v-model="dataForm.modifyTime" placeholder="修改时间"></el-input>
-    </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
@@ -55,6 +47,13 @@
 export default {
   data () {
     return {
+      sexOption: [{
+        value: 0,
+        label: '男'
+      }, {
+        value: 1,
+        label: '女'
+      }],
       visible: false,
       dataForm: {
         id: 0,

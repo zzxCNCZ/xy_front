@@ -19,6 +19,16 @@
       <el-form-item label="手机号" prop="mobile">
         <el-input v-model="dataForm.mobile" placeholder="手机号"></el-input>
       </el-form-item>
+      <el-form-item label="医生" prop="doctorId">
+        <el-select v-model="dataForm.doctorId" style="display: grid"   placeholder="请选择">
+          <el-option
+            v-for="item in doctorOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
       <el-form-item label="角色" size="mini" prop="roleIdList">
         <el-checkbox-group v-model="dataForm.roleIdList">
           <el-checkbox v-for="role in roleList" :key="role.roleId" :label="role.roleId">{{ role.roleName }}</el-checkbox>
@@ -84,8 +94,10 @@ export default {
         email: '',
         mobile: '',
         roleIdList: [],
-        status: 1
+        status: 1,
+        doctorId: ''
       },
+      doctorOptions: [],
       dataRule: {
         userName: [
           { required: true, message: '用户名不能为空', trigger: 'blur' }
@@ -106,6 +118,9 @@ export default {
         ]
       }
     }
+  },
+  created () {
+    this.getDoctorOption()
   },
   methods: {
     init (id) {
@@ -135,9 +150,27 @@ export default {
               this.dataForm.mobile = data.user.mobile
               this.dataForm.roleIdList = data.user.roleIdList
               this.dataForm.status = data.user.status
+              this.dataForm.doctorId = data.user.doctorId
             }
           })
         }
+      })
+    },
+    getDoctorOption () {
+      this.doctorOptions = []
+      this.$http({
+        url: this.$http.adornUrl('/user/doctor/getDoctorByJob'),
+        method: 'get',
+        params: this.$http.adornParams({
+          job: ''
+        })
+      }).then(({data}) => {
+        data.doctor.map(item => {
+          let option = {}
+          option.value = item.id
+          option.label = item.name + ':' + item.mobile
+          this.doctorOptions.push(option)
+        })
       })
     },
     // 表单提交
@@ -155,7 +188,8 @@ export default {
               'email': this.dataForm.email,
               'mobile': this.dataForm.mobile,
               'status': this.dataForm.status,
-              'roleIdList': this.dataForm.roleIdList
+              'roleIdList': this.dataForm.roleIdList,
+              'doctorId': this.dataForm.doctorId
             })
           }).then(({data}) => {
             if (data && data.code === 0) {

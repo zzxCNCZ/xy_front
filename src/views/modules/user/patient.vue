@@ -131,8 +131,8 @@
         width="150"
         label="病历">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="addDiagnose(scope.row.recordId)">填写</el-button>
-          <el-button type="text" size="small" @click="getDiagnoseList(scope.row.recordId)">历史记录</el-button>
+          <el-button v-if="scope.row.status!==null" type="text" size="small" @click="addDiagnose(scope.row.recordId)">填写</el-button>
+          <el-button v-if="scope.row.status!==null" type="text" size="small" @click="getDiagnoseList(scope.row.recordId)">历史记录</el-button>
         </template>
       </el-table-column>
       <el-table-column
@@ -220,6 +220,11 @@ export default {
   activated () {
     this.getDataList()
   },
+  computed: {
+    doctorId: {
+      get () { return this.$store.state.user.doctorId }
+    }
+  },
   methods: {
     // 获取数据列表
     getDataList () {
@@ -230,7 +235,7 @@ export default {
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          'key': this.dataForm.key
+          'doctorId': this.doctorId === 1 ? '' : this.doctorId
         })
       }).then(({data}) => {
         if (data && data.code === 0) {

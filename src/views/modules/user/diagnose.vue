@@ -119,7 +119,7 @@ export default {
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          'recordId': this.dataForm.recordId
+          'recordId': this.dataForm.recordId === null ? '' : this.dataForm.recordId
         })
       }).then(({data}) => {
         if (data && data.code === 0) {
