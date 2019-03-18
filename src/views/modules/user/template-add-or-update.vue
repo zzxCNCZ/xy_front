@@ -25,17 +25,6 @@ import VueUeditorWrap from 'vue-ueditor-wrap'
 export default {
   data () {
     return {
-      ueConfig: {
-        zIndex: 2999,
-        toolbars: [
-          ['undo', 'redo', 'indent', 'bold', 'italic', '|', 'fontfamily', 'fontsize', '|', 'template'],
-          ['justifyleft', 'justifyright', 'justifycenter', 'justifyjustify', 'print', 'preview']
-        ],
-        // theme: 'gray',
-        elementPathEnabled: false,
-        wordCount: false,
-        serverUrl: ''
-      },
       visible: false,
       dataForm: {
         id: 0,
@@ -65,6 +54,9 @@ export default {
     },
     doctorId: {
       get () { return this.$store.state.user.doctorId }
+    },
+    ueConfig: {
+      get () { return this.$store.state.config.ueConfig }
     }
   },
   methods: {

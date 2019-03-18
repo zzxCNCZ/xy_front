@@ -129,7 +129,7 @@
         header-align="center"
         align="center"
         width="150"
-        label="病历">
+        label="病程">
         <template slot-scope="scope">
           <el-button v-if="scope.row.status!==null" type="text" size="small" @click="addDiagnose(scope.row.recordId)">填写</el-button>
           <el-button v-if="scope.row.status!==null" type="text" size="small" @click="getDiagnoseList(scope.row.recordId)">历史记录</el-button>
@@ -141,6 +141,16 @@
         align="center"
         width="150"
         label="住院记录">
+        <template slot-scope="scope">
+          <el-button type="text" size="small" @click="getRecordList(scope.row.id)">历史记录</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
+        label="缴费记录">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="getRecordList(scope.row.id)">历史记录</el-button>
         </template>
