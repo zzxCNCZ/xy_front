@@ -118,6 +118,16 @@
         header-align="center"
         align="center"
         width="150"
+        label="住院病案">
+        <template slot-scope="scope">
+          <el-button  type="text" size="small" @click="caseDetailHandle(scope.row.id)">详情</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
         label="手续">
         <template slot-scope="scope">
           <el-button v-if="scope.row.status===null" type="text" size="small" @click="addRecordHandle(scope.row.id)">入院</el-button>
@@ -133,6 +143,7 @@
         <template slot-scope="scope">
           <el-button v-if="scope.row.status!==null" type="text" size="small" @click="addDiagnose(scope.row.recordId)">填写</el-button>
           <el-button v-if="scope.row.status!==null" type="text" size="small" @click="getDiagnoseList(scope.row.recordId)">历史记录</el-button>
+          <p v-else>————</p>
         </template>
       </el-table-column>
       <el-table-column
@@ -140,7 +151,7 @@
         header-align="center"
         align="center"
         width="150"
-        label="住院记录">
+        label="住院">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="getRecordList(scope.row.id)">历史记录</el-button>
         </template>
@@ -187,7 +198,8 @@
     <diagnose-list v-if="diagnoseListVisible" ref="diagnoseList" @refreshDataList="getDataList"></diagnose-list>
     <!-- 入院历史记录-->
     <record-list v-if="recordListVisible" ref="recordList" @refreshDataList="getDataList"></record-list>
-
+    <!-- 病案 -->
+    <case-detail v-if="caseDetailVisible" ref="caseDetail" @refreshDataList="getDataList"></case-detail>
   </div>
 </template>
 
@@ -199,6 +211,8 @@ import AddDiagnose from './patientdiagnose-add-or-update'
 
 import DiagnoseList from './diagnose'
 import RecordList from './record'
+
+import CaseDetail from './case-detail'
 
 export default {
   data () {
@@ -217,7 +231,8 @@ export default {
       addPatientRecordVisible: false,
       diagnoseListVisible: false,
       recordListVisible: false,
-      addDiagnoseVisible: false
+      addDiagnoseVisible: false,
+      caseDetailVisible: false
     }
   },
   components: {
@@ -225,7 +240,8 @@ export default {
     AddPatientRecord,
     DiagnoseList,
     AddDiagnose,
-    RecordList
+    RecordList,
+    CaseDetail
   },
   activated () {
     this.getDataList()
@@ -285,6 +301,13 @@ export default {
       this.diagnoseListVisible = true
       this.$nextTick(() => {
         this.$refs.diagnoseList.initDiagnoseList(recordId)
+      })
+    },
+    // 病案首页
+    caseDetailHandle (id) {
+      this.caseDetailVisible = true
+      this.$nextTick(() => {
+        this.$refs.caseDetail.init(id)
       })
     },
     // 出院
