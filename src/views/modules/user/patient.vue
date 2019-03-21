@@ -194,7 +194,7 @@
 
     <!-- 新增病历-->
     <add-diagnose v-if="addDiagnoseVisible" ref="addDiagnose" @refreshDataList="getDataList"></add-diagnose>
-    <!-- 病历历史-->
+    <!-- 病程历史-->
     <diagnose-list v-if="diagnoseListVisible" ref="diagnoseList" @refreshDataList="getDataList"></diagnose-list>
     <!-- 入院历史记录-->
     <record-list v-if="recordListVisible" ref="recordList" @refreshDataList="getDataList"></record-list>

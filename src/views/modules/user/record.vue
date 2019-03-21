@@ -9,7 +9,7 @@
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @submit.native.prevent  @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.patientId" placeholder="参数名" clearable></el-input>
+        <el-input v-model="dataForm.inpatientNum" placeholder="住院号" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
@@ -45,21 +45,24 @@
         header-align="center"
         align="center"
         label="护理级别">
+        <template slot-scope="scope">
+          {{scope.row.nurseLevel | nurseLevelFilter}}
+        </template>
       </el-table-column>
       <el-table-column
-        prop="bedDoctor"
+        prop="bedDoctorName"
         header-align="center"
         align="center"
         label="管床医师">
       </el-table-column>
       <el-table-column
-        prop="mainDoctor"
+        prop="mainDoctorName"
         header-align="center"
         align="center"
         label="主治医师">
       </el-table-column>
       <el-table-column
-        prop="chiefDoctor"
+        prop="chiefDoctorName"
         header-align="center"
         align="center"
         label="主任医师">
@@ -86,12 +89,6 @@
         label="出院日期">
       </el-table-column>
       <el-table-column
-        prop="createBy"
-        header-align="center"
-        align="center"
-        label="创建人">
-      </el-table-column>
-      <el-table-column
         prop="createTime"
         header-align="center"
         align="center"
@@ -102,7 +99,7 @@
         header-align="center"
         align="center"
         width="150"
-        label="病历">
+        label="病程">
         <template slot-scope="scope">
           <el-button v-if="scope.row.status!==null" type="text" size="small" @click="getDiagnoseList(scope.row.id)">历史记录</el-button>
         </template>
@@ -144,7 +141,8 @@ export default {
   data () {
     return {
       dataForm: {
-        patientId: ''
+        patientId: '',
+        inpatientNum: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -171,6 +169,17 @@ export default {
       } else {
         return '否'
       }
+    },
+    nurseLevelFilter: level => {
+      if (level === '1') {
+        return '普通护理'
+      } else if (level === '2') {
+        return '特殊护理'
+      } else if (level === '3') {
+        return '紧急护理'
+      } else {
+        return '其他'
+      }
     }
   },
   methods: {
@@ -195,7 +204,8 @@ export default {
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          'patientId': this.dataForm.patientId
+          'patientId': this.dataForm.patientId,
+          'inpatientNum': this.dataForm.inpatientNum
         })
       }).then(({data}) => {
         if (data && data.code === 0) {

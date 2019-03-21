@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="!dataForm.id ? '病历记录' : '修改'"
+    :title="!dataForm.id ? '病程记录' : '修改'"
     :close-on-click-modal="false"
     :visible.sync="visible"
     width="70%"
@@ -9,7 +9,7 @@
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @submit.native.prevent  @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.title" placeholder="参数名" clearable></el-input>
+        <el-input v-model="dataForm.title" placeholder="标题" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
@@ -119,6 +119,7 @@ export default {
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
+          'title': this.dataForm.title,
           'recordId': this.dataForm.recordId === null ? '' : this.dataForm.recordId
         })
       }).then(({data}) => {

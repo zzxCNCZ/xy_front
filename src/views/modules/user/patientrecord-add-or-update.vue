@@ -2,6 +2,7 @@
   <el-dialog
     :title="!dataForm.id ? '新增' : '修改'"
     :close-on-click-modal="false"
+    append-to-body
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
     <!--<el-form-item label="病人id" prop="patientId">-->
@@ -150,6 +151,11 @@ export default {
       }
     }
   },
+  created () {
+    this.getBedDoctorOption()
+    this.getMainDoctorOption()
+    this.getChiefDoctorOption()
+  },
   methods: {
     // 单位数选中
     deptListTreeCurrentChangeHandle (data, node) {
@@ -169,9 +175,6 @@ export default {
     init (id) {
       this.dataForm.id = id || 0
       this.visible = true
-      this.getBedDoctorOption()
-      this.getMainDoctorOption()
-      this.getChiefDoctorOption()
       this.$http({
         url: this.$http.adornUrl('/user/dept/all'),
         method: 'get',
@@ -197,9 +200,9 @@ export default {
               this.dataForm.inpatientNum = data.patientRecord.inpatientNum
               this.dataForm.deptNum = data.patientRecord.deptNum
               this.dataForm.nurseLevel = data.patientRecord.nurseLevel
-              this.dataForm.bedDoctor = data.patientRecord.bedDoctor
-              this.dataForm.mainDoctor = data.patientRecord.mainDoctor
-              this.dataForm.chiefDoctor = data.patientRecord.chiefDoctor
+              this.dataForm.bedDoctor = parseInt(data.patientRecord.bedDoctor)
+              this.dataForm.mainDoctor = parseInt(data.patientRecord.mainDoctor)
+              this.dataForm.chiefDoctor = parseInt(data.patientRecord.chiefDoctor)
               this.dataForm.status = data.patientRecord.status
               this.dataForm.startTime = data.patientRecord.startTime
               this.dataForm.endTime = data.patientRecord.endTime

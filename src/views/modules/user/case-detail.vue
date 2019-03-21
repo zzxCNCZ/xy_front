@@ -110,15 +110,40 @@ export default {
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
-                console.log(data.allRecord)
                 let caseDetail = this.dataForm.content
-                caseDetail = caseDetail.replace('main_doctor', data.allRecord[0].mainDoctor)
-                caseDetail = caseDetail.replace('chief_doctor', data.allRecord[0].chiefDoctor)
-                caseDetail = caseDetail.replace('bed_doctor', data.allRecord[0].bedDoctor)
+                caseDetail = caseDetail.replace('main_doctor', data.allRecord[0].mainDoctorName)
+                caseDetail = caseDetail.replace('chief_doctor', data.allRecord[0].chiefDoctorName)
+                caseDetail = caseDetail.replace('bed_doctor', data.allRecord[0].bedDoctorName)
                 caseDetail = caseDetail.replace('start_time', data.allRecord[0].startTime)
                 caseDetail = caseDetail.replace('end_time', data.allRecord[0].endTime)
+                // 入院次数
+                caseDetail = caseDetail.replace('times', data.allRecord.length)
+                // 住院号
+                caseDetail = caseDetail.replace('inPatientNum', data.allRecord[0].inpatientNum)
                 this.dataForm.content = caseDetail
               }
+              return data.allRecord[0].id
+            }).then((data) => {
+              console.log(data)
+              this.$http({
+                url: this.$http.adornUrl('/user/patientdiagnose/queryAllDiagnoseByRecordId'),
+                method: 'get',
+                params: this.$http.adornParams({
+                  'recordId': data
+                })
+              }).then(({data}) => {
+                if (data && data.code === 0) {
+                  let caseDetail = this.dataForm.content
+                  for (let i = 0; i < 6; i++) {
+                    if (i < data.allDiagnose.length) {
+                      caseDetail = caseDetail.replace('diagnose' + i, data.allDiagnose[i].title)
+                    } else {
+                      caseDetail = caseDetail.replace('diagnose' + i, '无')
+                    }
+                  }
+                  this.dataForm.content = caseDetail
+                }
+              })
             })
           })
         }
