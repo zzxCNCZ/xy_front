@@ -13,7 +13,7 @@
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
-        <el-button v-if="isAuth('user:patientrecord:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <!--<el-button v-if="isAuth('user:patientrecord:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
       </el-form-item>
     </el-form>
     <el-table
@@ -101,7 +101,17 @@
         width="150"
         label="病程">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.status!==null" type="text" size="small" @click="getDiagnoseList(scope.row.id)">历史记录</el-button>
+          <el-button  type="text" size="small" @click="getDiagnoseList(scope.row.id)">历史记录</el-button>
+        </template>
+      </el-table-column>
+      <el-table-column
+        fixed="right"
+        header-align="center"
+        align="center"
+        width="150"
+        label="缴费">
+        <template slot-scope="scope">
+          <el-button  type="text" size="small" @click="getPatientCostList(scope.row.id)">历史记录</el-button>
         </template>
       </el-table-column>
       <el-table-column
@@ -129,6 +139,8 @@
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
     <!-- 病历历史-->
     <diagnose-list v-if="diagnoseListVisible" ref="diagnoseList" @refreshDataList="getDataList"></diagnose-list>
+    <!-- 缴费历史-->
+    <patient-cost-list v-if="patientCostListVisible" ref="patientCostList" @refreshDataList="getDataList"></patient-cost-list>
   </div>
   </el-dialog>
 </template>
@@ -136,6 +148,7 @@
 <script>
 import AddOrUpdate from './patientrecord-add-or-update'
 import DiagnoseList from './diagnose'
+import PatientCostList from './cost'
 
 export default {
   data () {
@@ -152,12 +165,14 @@ export default {
       dataListSelections: [],
       addOrUpdateVisible: false,
       visible: false,
-      diagnoseListVisible: false
+      diagnoseListVisible: false,
+      patientCostListVisible: false
     }
   },
   components: {
     AddOrUpdate,
-    DiagnoseList
+    DiagnoseList,
+    PatientCostList
   },
   activated () {
     // this.getDataList()
@@ -192,6 +207,13 @@ export default {
       this.diagnoseListVisible = true
       this.$nextTick(() => {
         this.$refs.diagnoseList.initDiagnoseList(recordId)
+      })
+    },
+    // 缴费记录
+    getPatientCostList (recordId) {
+      this.patientCostListVisible = true
+      this.$nextTick(() => {
+        this.$refs.patientCostList.initPatientCostList(recordId)
       })
     },
     // 获取数据列表

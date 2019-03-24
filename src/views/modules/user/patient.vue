@@ -2,7 +2,7 @@
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @submit.native.prevent  @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
+        <el-input v-model="dataForm.name" placeholder="姓名" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
@@ -117,7 +117,7 @@
         fixed="right"
         header-align="center"
         align="center"
-        width="150"
+        width="100"
         label="住院病案">
         <template slot-scope="scope">
           <el-button  type="text" size="small" @click="caseDetailHandle(scope.row.id)">详情</el-button>
@@ -127,7 +127,7 @@
         fixed="right"
         header-align="center"
         align="center"
-        width="150"
+        width="100"
         label="手续">
         <template slot-scope="scope">
           <el-button v-if="scope.row.status===null" type="text" size="small" @click="addRecordHandle(scope.row.id)">入院</el-button>
@@ -150,7 +150,7 @@
         fixed="right"
         header-align="center"
         align="center"
-        width="150"
+        width="100"
         label="住院">
         <template slot-scope="scope">
           <el-button type="text" size="small" @click="getRecordList(scope.row.id)">历史记录</el-button>
@@ -160,10 +160,11 @@
         fixed="right"
         header-align="center"
         align="center"
-        width="150"
-        label="缴费记录">
+        width="100"
+        label="缴费">
         <template slot-scope="scope">
-          <el-button type="text" size="small" @click="getRecordList(scope.row.id)">历史记录</el-button>
+          <el-button v-if="scope.row.status!==null" type="text" size="small" @click="addPatientCost(scope.row.recordId)">填写</el-button>
+          <p v-else>————</p>
         </template>
       </el-table-column>
       <el-table-column
@@ -192,7 +193,7 @@
     <!-- 新增入院记录-->
     <add-patient-record v-if="addPatientRecordVisible" ref="addPatientRecord" @refreshDataList="getDataList"></add-patient-record>
 
-    <!-- 新增病历-->
+    <!-- 新增病程-->
     <add-diagnose v-if="addDiagnoseVisible" ref="addDiagnose" @refreshDataList="getDataList"></add-diagnose>
     <!-- 病程历史-->
     <diagnose-list v-if="diagnoseListVisible" ref="diagnoseList" @refreshDataList="getDataList"></diagnose-list>
@@ -200,6 +201,8 @@
     <record-list v-if="recordListVisible" ref="recordList" @refreshDataList="getDataList"></record-list>
     <!-- 病案 -->
     <case-detail v-if="caseDetailVisible" ref="caseDetail" @refreshDataList="getDataList"></case-detail>
+    <!-- 缴费-->
+    <add-patient-cost v-if="addPatientCostVisible" ref="addPatientCost" @refreshDataList="getDataList"></add-patient-cost>
   </div>
 </template>
 
@@ -214,12 +217,14 @@ import RecordList from './record'
 
 import CaseDetail from './case-detail'
 
+import AddPatientCost from './patientcost-add-or-update'
+
 export default {
   data () {
     return {
       columnVisible: false,
       dataForm: {
-        key: ''
+        name: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -232,7 +237,8 @@ export default {
       diagnoseListVisible: false,
       recordListVisible: false,
       addDiagnoseVisible: false,
-      caseDetailVisible: false
+      caseDetailVisible: false,
+      addPatientCostVisible: false
     }
   },
   components: {
@@ -241,7 +247,8 @@ export default {
     DiagnoseList,
     AddDiagnose,
     RecordList,
-    CaseDetail
+    CaseDetail,
+    AddPatientCost
   },
   activated () {
     this.getDataList()
@@ -261,7 +268,8 @@ export default {
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          'doctorId': this.doctorId === 1 ? '' : this.doctorId
+          'doctorId': this.doctorId === 1 ? '' : this.doctorId,
+          'name': this.dataForm.name
         })
       }).then(({data}) => {
         if (data && data.code === 0) {
@@ -289,14 +297,21 @@ export default {
     selectionChangeHandle (val) {
       this.dataListSelections = val
     },
-    // 填写病历
+    // 填写病程
     addDiagnose (recordId) {
       this.addDiagnoseVisible = true
       this.$nextTick(() => {
         this.$refs.addDiagnose.initAddDiagnose(recordId)
       })
     },
-    // 病历记录
+    // 填写缴费记录
+    addPatientCost (recordId) {
+      this.addPatientCostVisible = true
+      this.$nextTick(() => {
+        this.$refs.addPatientCost.initAddPatientCost(recordId)
+      })
+    },
+    // 病程记录
     getDiagnoseList (recordId) {
       this.diagnoseListVisible = true
       this.$nextTick(() => {

@@ -136,7 +136,8 @@ export default {
         url: this.$http.adornUrl('/user/template/getTemplateByDoctorId'),
         method: 'get',
         params: this.$http.adornParams({
-          'doctorId': this.doctorId
+          // 'doctorId': this.doctorId
+          'doctorId': ''
         })
       }).then(({data}) => {
         data.templateList.map(item => {

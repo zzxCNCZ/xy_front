@@ -1,12 +1,9 @@
 <template>
   <el-dialog
-    :title="!dataForm.id ? '新增' : '修改'"
+    :title="!dataForm.id ? '缴费新增' : '修改'"
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="病人记录ID" prop="patientRecordId">
-      <el-input v-model="dataForm.patientRecordId" placeholder="病人记录ID"></el-input>
-    </el-form-item>
     <el-form-item label="项目" prop="item">
       <el-input v-model="dataForm.item" placeholder="项目"></el-input>
     </el-form-item>
@@ -15,21 +12,6 @@
     </el-form-item>
     <el-form-item label="费用" prop="cost">
       <el-input v-model="dataForm.cost" placeholder="费用"></el-input>
-    </el-form-item>
-    <el-form-item label="删除标志" prop="delFlag">
-      <el-input v-model="dataForm.delFlag" placeholder="删除标志"></el-input>
-    </el-form-item>
-    <el-form-item label="创建人" prop="createBy">
-      <el-input v-model="dataForm.createBy" placeholder="创建人"></el-input>
-    </el-form-item>
-    <el-form-item label="创建时间" prop="createTime">
-      <el-input v-model="dataForm.createTime" placeholder="创建时间"></el-input>
-    </el-form-item>
-    <el-form-item label="修改人" prop="modifyBy">
-      <el-input v-model="dataForm.modifyBy" placeholder="修改人"></el-input>
-    </el-form-item>
-    <el-form-item label="修改时间" prop="modifyTime">
-      <el-input v-model="dataForm.modifyTime" placeholder="修改时间"></el-input>
     </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
@@ -57,9 +39,6 @@ export default {
         modifyTime: ''
       },
       dataRule: {
-        patientRecordId: [
-          { required: true, message: '病人记录ID不能为空', trigger: 'blur' }
-        ],
         item: [
           { required: true, message: '项目不能为空', trigger: 'blur' }
         ],
@@ -68,26 +47,15 @@ export default {
         ],
         cost: [
           { required: true, message: '费用不能为空', trigger: 'blur' }
-        ],
-        delFlag: [
-          { required: true, message: '删除标志不能为空', trigger: 'blur' }
-        ],
-        createBy: [
-          { required: true, message: '创建人不能为空', trigger: 'blur' }
-        ],
-        createTime: [
-          { required: true, message: '创建时间不能为空', trigger: 'blur' }
-        ],
-        modifyBy: [
-          { required: true, message: '修改人不能为空', trigger: 'blur' }
-        ],
-        modifyTime: [
-          { required: true, message: '修改时间不能为空', trigger: 'blur' }
         ]
       }
     }
   },
   methods: {
+    initAddPatientCost (recordId) {
+      this.dataForm.patientRecordId = recordId
+      this.init(0)
+    },
     init (id) {
       this.dataForm.id = id || 0
       this.visible = true
@@ -104,11 +72,7 @@ export default {
               this.dataForm.item = data.patientCost.item
               this.dataForm.remark = data.patientCost.remark
               this.dataForm.cost = data.patientCost.cost
-              this.dataForm.delFlag = data.patientCost.delFlag
               this.dataForm.createBy = data.patientCost.createBy
-              this.dataForm.createTime = data.patientCost.createTime
-              this.dataForm.modifyBy = data.patientCost.modifyBy
-              this.dataForm.modifyTime = data.patientCost.modifyTime
             }
           })
         }

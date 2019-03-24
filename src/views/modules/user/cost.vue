@@ -1,12 +1,19 @@
 <template>
+  <el-dialog
+    :title="!dataForm.id ? '病程记录' : '修改'"
+    :close-on-click-modal="false"
+    :visible.sync="visible"
+    width="70%"
+    append-to-body
+  >
   <div class="mod-config">
     <el-form :inline="true" :model="dataForm" @submit.native.prevent  @keyup.enter.native="getDataList()">
       <el-form-item>
-        <el-input v-model="dataForm.title" placeholder="标题名称" clearable></el-input>
+        <el-input v-model="dataForm.item" placeholder="项目名" clearable></el-input>
       </el-form-item>
       <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
-        <el-button v-if="isAuth('user:template:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
+        <!--<el-button v-if="isAuth('user:patientcost:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
       </el-form-item>
     </el-form>
     <el-table
@@ -16,10 +23,28 @@
       @selection-change="selectionChangeHandle"
       style="width: 100%;">
       <el-table-column
-        prop="title"
+        prop="item"
         header-align="center"
         align="center"
-        label="标题">
+        label="项目">
+      </el-table-column>
+      <el-table-column
+        prop="remark"
+        header-align="center"
+        align="center"
+        label="备注">
+      </el-table-column>
+      <el-table-column
+        prop="cost"
+        header-align="center"
+        align="center"
+        label="费用">
+      </el-table-column>
+      <el-table-column
+        prop="createTime"
+        header-align="center"
+        align="center"
+        label="创建时间">
       </el-table-column>
       <el-table-column
         fixed="right"
@@ -45,15 +70,17 @@
     <!-- 弹窗, 新增 / 修改 -->
     <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"></add-or-update>
   </div>
+  </el-dialog>
 </template>
 
 <script>
-import AddOrUpdate from './template-add-or-update'
+import AddOrUpdate from './patientcost-add-or-update'
 export default {
   data () {
     return {
       dataForm: {
-        title: ''
+        item: '',
+        recordId: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -61,7 +88,8 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      visible: false
     }
   },
   components: {
@@ -70,23 +98,23 @@ export default {
   activated () {
     this.getDataList()
   },
-  computed: {
-    doctorId: {
-      get () { return this.$store.state.user.doctorId }
-    }
-  },
   methods: {
+    initPatientCostList (recordId) {
+      this.dataForm.recordId = recordId
+      this.getDataList()
+    },
     // 获取数据列表
     getDataList () {
+      this.visible = true
       this.dataListLoading = true
       this.$http({
-        url: this.$http.adornUrl('/user/template/list'),
+        url: this.$http.adornUrl('/user/patientcost/list'),
         method: 'get',
         params: this.$http.adornParams({
           'page': this.pageIndex,
           'limit': this.pageSize,
-          // 'doctorId': this.doctorId
-          'doctorId': ''
+          'recordId': this.dataForm.recordId,
+          'item': this.dataForm.item
         })
       }).then(({data}) => {
         if (data && data.code === 0) {
@@ -132,7 +160,7 @@ export default {
         type: 'warning'
       }).then(() => {
         this.$http({
-          url: this.$http.adornUrl('/user/template/delete'),
+          url: this.$http.adornUrl('/user/patientcost/delete'),
           method: 'post',
           data: this.$http.adornData(ids, false)
         }).then(({data}) => {
