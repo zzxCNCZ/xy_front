@@ -1,9 +1,57 @@
 <template>
     <div class="mod-demo-echarts">
       <el-row :gutter="20">
-        <el-col :span="24">
+        <el-col :span="8" >
+          <el-card style="text-align: center">
+            <el-col :span="12" offset="6">
+              <icon-svg name="patient" class="head_icon" style="color: #00a0e9"></icon-svg>
+              <h1 style="float: right">290人</h1>
+            </el-col>
+          </el-card>
+        </el-col>
+        <el-col :span="8" >
           <el-card>
-            <div id="J_chartBarBox" class="chart-box"></div>
+            <el-col :span="12" offset="6">
+              <icon-svg name="icu" class="head_icon" style="color: #ff5234"></icon-svg>
+              <h1 style="float: right">35人</h1>
+            </el-col>
+          </el-card>
+        </el-col>
+        <el-col :span="8" >
+          <el-card>
+            <el-col :span="12" offset="6">
+              <icon-svg name="medicalcase" class="head_icon" style="color: #21ff22"></icon-svg>
+              <h1 style="float: right">148例</h1>
+            </el-col>
+          </el-card>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="12" >
+          <el-card>
+            <ve-line :data="lineData"></ve-line>
+          </el-card>
+        </el-col>
+        <el-col :span="12" >
+          <el-card>
+            <ve-histogram :data="barData" :settings="barChartSettings"></ve-histogram>
+          </el-card>
+        </el-col>
+      </el-row>
+      <el-row :gutter="20">
+        <el-col :span="8" >
+          <el-card>
+            <ve-pie :data="pieData"></ve-pie>
+          </el-card>
+        </el-col>
+        <el-col :span="8" >
+          <el-card>
+            <ve-ring :data="ringData" :settings="ringChartSettings"></ve-ring>
+          </el-card>
+        </el-col>
+        <el-col :span="8" >
+          <el-card>
+            <ve-funnel :data="funnelData" :settings="funnelChartSettings"></ve-funnel>
           </el-card>
         </el-col>
       </el-row>
@@ -11,124 +59,77 @@
 </template>
 
 <script>
-import echarts from 'echarts'
+
 export default {
   data () {
-    return {
-      chartBar: null
+    this.barChartSettings = {
+      axisSite: { right: ['下单率'] },
+      yAxisType: ['KMB', 'percent'],
+      yAxisName: ['数值', '比率']
     }
-  },
-  mounted () {
-    this.initChartBar()
-  },
-  activated () {
-    // 由于给echart添加了resize事件, 在组件激活时需要重新resize绘画一次, 否则出现空白bug
-    if (this.chartBar) {
-      this.chartBar.resize()
+    this.ringChartSettings = {
+      roseType: 'radius'
+    }
+    this.funnelChartSettings = {
+      sequence: ['订单', '点击', '访问', '展示']
+    }
+    return {
+      chartBar: null,
+      // 折线图
+      lineData: {
+        columns: ['月份', '住院病人总数', '男性病人', '女性病人'],
+        rows: [
+          { '月份': '1', '住院病人总数': 1393, '男性病人': 693, '女性病人': 700 },
+          { '月份': '2', '住院病人总数': 1400, '男性病人': 750, '女性病人': 650 },
+          { '月份': '3', '住院病人总数': 1320, '男性病人': 620, '女性病人': 700 },
+          { '月份': '4', '住院病人总数': 1250, '男性病人': 650, '女性病人': 600 },
+          { '月份': '5', '住院病人总数': 1344, '男性病人': 540, '女性病人': 804 },
+          { '月份': '6', '住院病人总数': 1230, '男性病人': 520, '女性病人': 710 }
+        ]
+      },
+      barData: {
+        columns: ['年龄', '男性病人', '女性病人'],
+        rows: [
+          { '年龄': '50+', '男性病人': 33, '女性病人': 43 },
+          { '年龄': '60+', '男性病人': 60, '女性病人': 80 },
+          { '年龄': '70+', '男性病人': 53, '女性病人': 83 },
+          { '年龄': '80+', '男性病人': 43, '女性病人': 43 },
+          { '年龄': '90+', '男性病人': 18, '女性病人': 12 }]
+      },
+      pieData: {
+        columns: ['日期', '访问用户'],
+        rows: [
+          { '日期': '1/1', '访问用户': 1393 },
+          { '日期': '1/2', '访问用户': 3530 },
+          { '日期': '1/3', '访问用户': 2923 },
+          { '日期': '1/4', '访问用户': 1723 },
+          { '日期': '1/5', '访问用户': 3792 },
+          { '日期': '1/6', '访问用户': 4593 }
+        ]
+      },
+      ringData: {
+        columns: ['日期', '访问用户'],
+        rows: [
+          { '日期': '1/1', '访问用户': 1393 },
+          { '日期': '1/2', '访问用户': 3530 },
+          { '日期': '1/3', '访问用户': 2923 },
+          { '日期': '1/4', '访问用户': 1723 },
+          { '日期': '1/5', '访问用户': 3792 },
+          { '日期': '1/6', '访问用户': 4593 }
+        ]
+      },
+      funnelData: {
+        columns: ['病程', '数值'],
+        rows: [
+          { '病程': '记忆减退', '数值': 900 },
+          { '病程': '视力模糊', '数值': 600 },
+          { '病程': '行动不便', '数值': 300 },
+          { '病程': '卧床不起', '数值': 100 }
+        ]
+      }
     }
   },
   methods: {
-    // 柱状图
-    initChartBar () {
-      var option = {
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        legend: {
-          data: ['数据1', '数据2', '数据3', '数据4', '数据5', '数据6', '数据7', '数据8', '数据9']
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: [
-          {
-            type: 'category',
-            data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
-          }
-        ],
-        yAxis: [
-          {
-            type: 'value'
-          }
-        ],
-        series: [
-          {
-            name: '数据1',
-            type: 'bar',
-            data: [320, 332, 301, 334, 390, 330, 320]
-          },
-          {
-            name: '数据2',
-            type: 'bar',
-            stack: '广告',
-            data: [120, 132, 101, 134, 90, 230, 210]
-          },
-          {
-            name: '数据3',
-            type: 'bar',
-            stack: '广告',
-            data: [220, 182, 191, 234, 290, 330, 310]
-          },
-          {
-            name: '数据4',
-            type: 'bar',
-            stack: '广告',
-            data: [150, 232, 201, 154, 190, 330, 410]
-          },
-          {
-            name: '数据5',
-            type: 'bar',
-            data: [862, 1018, 964, 1026, 1679, 1600, 1570],
-            markLine: {
-              lineStyle: {
-                normal: {
-                  type: 'dashed'
-                }
-              },
-              data: [
-                [{ type: 'min' }, { type: 'max' }]
-              ]
-            }
-          },
-          {
-            name: '数据6',
-            type: 'bar',
-            barWidth: 5,
-            stack: '搜索引擎',
-            data: [620, 732, 701, 734, 1090, 1130, 1120]
-          },
-          {
-            name: '数据7',
-            type: 'bar',
-            stack: '搜索引擎',
-            data: [120, 132, 101, 134, 290, 230, 220]
-          },
-          {
-            name: '数据8',
-            type: 'bar',
-            stack: '搜索引擎',
-            data: [60, 72, 71, 74, 190, 130, 110]
-          },
-          {
-            name: '数据9',
-            type: 'bar',
-            stack: '搜索引擎',
-            data: [62, 82, 91, 84, 109, 110, 120]
-          }
-        ]
-      }
-      this.chartBar = echarts.init(document.getElementById('J_chartBarBox'))
-      this.chartBar.setOption(option)
-      window.addEventListener('resize', () => {
-        this.chartBar.resize()
-      })
-    }
   }
 }
 </script>
@@ -146,5 +147,10 @@ export default {
   .chart-box {
     min-height: 400px;
   }
+  .head_icon{
+    width: 5em;
+    height: 5em;
+    float: left;
+    }
   }
 </style>

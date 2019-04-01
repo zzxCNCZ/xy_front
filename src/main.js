@@ -18,6 +18,7 @@ import httpRequest from '@/utils/httpRequest' // api: https://github.com/axios/a
 
 // import VueResource from 'vue-resource'
 // import '@/mock' // 引入mock
+import VCharts from 'v-charts'
 
 import { isAuth } from '@/utils'
 // 富文本编辑器
@@ -31,6 +32,8 @@ import 'print-js'
 Vue.use(VueQuillEditor)
 // Vue.use(VueResource) //  用express，模拟本地数据
 Vue.config.productionTip = false
+
+Vue.use(VCharts)
 
 // 挂载全局
 Vue.prototype.$http = httpRequest // ajax请求方法
